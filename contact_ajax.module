@@ -53,33 +53,17 @@ function contact_ajax_form_contact_message_form_alter(&$form, &$form_state, $for
     $ajax_enabled = $contact_form->getThirdPartySetting('contact_ajax', 'contact_ajax_enabled', FALSE);
 
     if ($ajax_enabled) {
-      $form['#prefix'] = '<div id="_contact_ajax_contact_form">';
+      $form['#prefix'] = '<div id="contact-ajax-contact-form">';
       $form['#suffix'] = '</div>';
-
-      $form['#ajaxsubmit'] = TRUE;
-      $form['#submit'][] = 'contact_ajax_contact_site_form_submit';
 
       // adjust the form to use ajax submit
       $form['actions']['submit']['#ajax'] = array(
           'callback' => 'contact_ajax_contact_site_form_ajax_callback',
-          'wrapper' => '_contact_ajax_contact_form',
-          'method' => 'replace',
+          'wrapper' => 'contact-ajax-contact-form',
           'effect' => 'fade',
       );
     }
   }
-}
-
-/**
- * Submit handler for contact form.
- * @param type $form
- * @param type $form_state
- */
-function contact_ajax_contact_site_form_submit($form, &$form_state) {
-  // rebuild the form after submitted successfully
-  $form_state['rebuild'] = TRUE;
-  // try this if you want to reset the form item values
-  $form_state['input'] = array();
 }
 
 /**
@@ -90,12 +74,5 @@ function contact_ajax_contact_site_form_submit($form, &$form_state) {
  */
 function contact_ajax_contact_site_form_ajax_callback($form, &$form_state) {
   return $form;
-}
-
-/**
- * Returns contact form.
- * @return type
- */
-function _contact_ajax_contact_form() {
 }
 
