@@ -11,6 +11,9 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\contact\ContactFormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\contact\Entity\ContactForm;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\node\Entity\Node;
 
 /**
  * Implements hook_form_FORM_ID_alter() for contact_form_form().
@@ -18,11 +21,22 @@ use Drupal\contact\Entity\ContactForm;
 function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $form_state) {
   /** @var \Drupal\contact\ContactFormInterface $contact_form */
   $contact_form = $form_state->getFormObject()->getEntity();
-  $form['ajax_enabled'] = [
+  $form['contact_ajax_enabled'] = [
     '#type' => 'checkbox',
     '#title' => t('Ajax Form'),
     '#description' => t('Send this form using ajax.'),
-    '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'contact_ajax_enabled', FALSE),
+    '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'enabled', FALSE),
+    ];
+
+  // default entity_autocomplete get an entity as default value
+  $node_id = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_uri', FALSE);
+  $node = Node::load($entity_uri);
+  $form['contact_ajax_load_from_uri'] = [
+    '#type' => 'entity_autocomplete',
+    '#target_type' => 'node',
+    '#default_value' => $node,
+    '#title' => t('Node to load'),
+    '#description' => t('This node will load its content after the form Submit.'),
   ];
   $form['#entity_builders'][] = 'contact_ajax_contact_form_form_builder';
 }
@@ -33,7 +47,8 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
  * @see contact_ajax_test_form_contact_form_edit_form_alter()
  */
 function contact_ajax_contact_form_form_builder($entity_type, ContactFormInterface $contact_form, &$form, FormStateInterface $form_state) {
-  $contact_form->setThirdPartySetting('contact_ajax', 'contact_ajax_enabled', $form_state->getValue('ajax_enabled'));
+  $contact_form->setThirdPartySetting('contact_ajax', 'enabled', $form_state->getValue('contact_ajax_enabled'));
+  $contact_form->setThirdPartySetting('contact_ajax', 'load_from_uri', $form_state->getValue('contact_ajax_load_from_uri'));
 }
 
 /**
@@ -50,7 +65,7 @@ function contact_ajax_form_contact_message_form_alter(&$form, &$form_state, $for
   /** @var \Drupal\Core\Entity\Display\EntityFormDisplayInterface $form_mode */
   if ($form_object instanceof MessageForm) {
 
-    $ajax_enabled = $contact_form->getThirdPartySetting('contact_ajax', 'contact_ajax_enabled', FALSE);
+    $ajax_enabled = $contact_form->getThirdPartySetting('contact_ajax', 'enabled', FALSE);
 
     if ($ajax_enabled) {
       $form['#prefix'] = '<div id="contact-ajax-contact-form">';
@@ -72,7 +87,29 @@ function contact_ajax_form_contact_message_form_alter(&$form, &$form_state, $for
  * @param type $form_state
  * @return type
  */
-function contact_ajax_contact_site_form_ajax_callback($form, &$form_state) {
-  return $form;
+function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface &$form_state) {
+
+  /** @var \Drupal\Core\Entity\ContentEntityForm $form_object */
+  $form_object = $form_state->getFormObject();
+  /* @var \Drupal\contact\MessageInterface $contact_message */
+  $contact_message = $form_object->getEntity();
+  $contact_form = ContactForm::load($contact_message->bundle());
+
+  if (!$form_state->getErrors()) {
+    // Create AJAX Response object.
+    $node_id = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_uri', FALSE);
+    $node = Node::load($node_id);
+    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+    $renderarray = $view_builder->view($node, 'full');
+    $output = \Drupal::service('renderer')->renderRoot($renderarray);
+
+    $response = new AjaxResponse();
+    $response->addCommand(new HtmlCommand('#contact-ajax-contact-form', $output));
+    return $response;
+  }
+  else {
+    // Form have some errors, return as it is.
+    return $form;
+  }
 }
 
