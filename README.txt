@@ -38,5 +38,5 @@ have two more settings
 
 MAINTAINERS
 -----------
-Current maintainer:
+Current maintainers:
  * (ziomizar) - https://drupal.org/user/814348
