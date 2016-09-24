@@ -30,7 +30,7 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
 
   // default entity_autocomplete get an entity as default value
   $node_id = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_uri', FALSE);
-  $node = Node::load($entity_uri);
+  $node = Node::load($node_id);
   $form['contact_ajax_load_from_uri'] = [
     '#type' => 'entity_autocomplete',
     '#target_type' => 'node',
