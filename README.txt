@@ -1,15 +1,42 @@
+CONTENTS OF THIS FILE
+---------------------
+
+* Introduction
+* Recommended modules
+* Installation
+* Configuration
+* Maintainers
+
+
 INTRODUCTION
 ------------
-Contact Ajax module implements ajax submission for Contact form in Drupal 8.
-This module take inspiration by contact_storage and the drupal 7 sandbox 
-https://www.drupal.org/sandbox/boyron/2239821.
-After enabled this module you will found a checkbox "Ajax enable" on every
- contact form settings page.
-Patch, suggestions and more stable alternative modules are welcome!
+The Contact Ajax module can be used to send all the contact forms on the website using ajax.
+
+
+RECOMMENDED MODULES
+-------------------
+* Contact Storage (https://www.drupal.org/project/contact_storage)
+
 
 INSTALLATION
 ------------
- * Install as you would normally install a contributed drupal module. See:
-  https://drupal.org/documentation/install/modules-themes/modules-8
+
+* Install as you would normally install a contributed Drupal module. See:
+  https://drupal.org/documentation/install/modules-themes/modules-7
   for further information.
 
+
+CONFIGURATION
+-------------
+The module has no menu settings.
+When enabled the module all the contact forms listed in admin/structure/contact
+have two more settings
+
+ - enable ajax : the form will be submitted without reloading the page
+ - load node : the node referenced by this field will be loaded in place of the form.
+
+
+MAINTAINERS
+-----------
+Current maintainers:
+ * (ziomizar) - https://drupal.org/user/814348
