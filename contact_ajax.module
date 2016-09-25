@@ -14,6 +14,7 @@ use Drupal\contact\Entity\ContactForm;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\node\Entity\Node;
+use Drupal\Core\Render\Element\StatusMessages;
 
 /**
  * Implements hook_form_FORM_ID_alter() for contact_form_form().
@@ -94,22 +95,30 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   /* @var \Drupal\contact\MessageInterface $contact_message */
   $contact_message = $form_object->getEntity();
   $contact_form = ContactForm::load($contact_message->bundle());
+  $node_id = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_uri', FALSE);
 
-  if (!$form_state->getErrors()) {
-    // Create AJAX Response object.
-    $node_id = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_uri', FALSE);
+  $messages = StatusMessages::renderMessages(); // Used to display results of drupal_set_message() calls.
+
+  // Create AJAX Response object.
+  $response = new AjaxResponse();
+
+  if ($node_id && !$form_state->getErrors()) {
+    // load_from_uri is configured, so load the node content.
     $node = Node::load($node_id);
-    $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
-    $renderarray = $view_builder->view($node, 'full');
-    $output = \Drupal::service('renderer')->renderRoot($renderarray);
-
-    $response = new AjaxResponse();
-    $response->addCommand(new HtmlCommand('#contact-ajax-contact-form', $output));
-    return $response;
+    if ($node) {
+      $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
+      $renderarray = $view_builder->view($node, 'full');
+      $output = \Drupal::service('renderer')->renderRoot($renderarray);
+      $response->addCommand(new HtmlCommand('#contact-ajax-contact-form', $output));
+    }
   }
   else {
-    // Form have some errors, return as it is.
-    return $form;
+    $output[] = $messages;
+    $output[] = $form;
+    // load_fom_uri is not configured, so return the form
+    $response->addCommand(new HtmlCommand('#contact-ajax-contact-form', $output));
   }
+
+  return $response;
 }
 
