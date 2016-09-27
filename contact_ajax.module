@@ -165,7 +165,7 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   $contact_form = ContactForm::load($contact_message->bundle());
   $confirmation_type = $contact_form->getThirdPartySetting('contact_ajax', 'confirmation_type', FALSE);
 
-  $messages = StatusMessages::renderMessages(); // Used to display results of drupal_set_message() calls.
+  $messages = StatusMessages::renderMessages(NULL); // Used to display results of drupal_set_message() calls.
 
   // Create AJAX Response object.
   $response = new AjaxResponse();
