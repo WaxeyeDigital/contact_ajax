@@ -3,3 +3,5 @@ description: Submit contact form using ajax.
 package: Contact
 type: module
 core: 8.x
+dependencies:
+  - contact
