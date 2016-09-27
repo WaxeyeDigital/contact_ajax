@@ -59,12 +59,20 @@ class ContactAjaxTest extends WebTestBase {
     $this->drupalGet('admin/structure/contact/add');
     $this->assertText(t('Ajax Form'));
 
+    $message = 'Your message has been sent.';
+
     // add a new contact form to test the default confirmation type
     // this form should be reloaded after submit
     $form_id = 'test_id';
     $mail = 'simpletest@example.com';
 
     $edit = [];
+    // 8.2.x added the message field, which is by default empty. Conditionally
+    // submit it if the field can be found.
+    $this->drupalGet('admin/structure/contact/add');
+    if ($this->xpath($this->constructFieldXpath('name', 'message'))) {
+      $edit['message'] = $message;
+    }
     $edit['label'] = 'test_label';
     $edit['id'] = $form_id;
     $edit['recipients'] = $mail;
