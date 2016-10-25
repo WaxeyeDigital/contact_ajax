@@ -5,6 +5,12 @@ contact.form.*.third_party.contact_ajax:
     enabled:
       type: boolean
       label: 'Ajax form'
+    hide_form:
+      type: boolean
+      label: 'Hide form'
+    prefix_id:
+      type: string
+      label: 'Prefix id'
     confirmation_type:
       type: integer
       label: 'Confirmation type'
