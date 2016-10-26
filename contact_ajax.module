@@ -268,11 +268,12 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
     $output[] = $form;
   }
 
+  $prefix = '#' . $element_id;
   $render_here = $contact_form->getThirdPartySetting('contact_ajax', 'render_selector', FALSE);
-  $render_selector = $render_here ? $render_here : '#' . $element_id;
-  if ($render_selector != $element_id) {
+  $render_selector = $render_here ? $render_here : $element_id;
+  if ($render_here != $prefix) {
     // if a custom selector is configured hide the form in its old position
-    $response->addCommand(new ReplaceCommand('#' . $element_id, ''));
+    $response->addCommand(new ReplaceCommand($prefix, ''));
   }
   $response->addCommand(new HtmlCommand($render_selector, $output));
 
