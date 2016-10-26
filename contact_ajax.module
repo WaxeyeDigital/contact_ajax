@@ -233,6 +233,8 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   // Create AJAX Response object.
   $response = new AjaxResponse();
 
+  $output = array();
+
   if (!$form_state->getErrors() && $confirmation_type != CONTACT_AJAX_LOAD_FORM) {
     switch ($confirmation_type) {
       case CONTACT_AJAX_LOAD_FROM_URI:
@@ -242,12 +244,12 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
         if ($node) {
           $view_builder = \Drupal::entityTypeManager()->getViewBuilder('node');
           $renderarray = $view_builder->view($node, 'full');
-          $output[] = \Drupal::service('renderer')->renderRoot($renderarray);
+          $output['#markup'] = \Drupal::service('renderer')->renderRoot($renderarray);
         }
         break;
       case CONTACT_AJAX_LOAD_FROM_MESSAGE:
         $confirmation_message = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_message', FALSE);
-        $output[] = $confirmation_message ? $confirmation_message['value'] : '';
+        $output['#markup'] = $confirmation_message ? $confirmation_message['value'] : '';
         break;
      }
   }
@@ -270,7 +272,7 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
 
   $prefix = '#' . $element_id;
   $render_here = $contact_form->getThirdPartySetting('contact_ajax', 'render_selector', FALSE);
-  $render_selector = $render_here ? $render_here : $element_id;
+  $render_selector = $render_here ? $render_here : $prefix;
   if ($render_here != $prefix) {
     // if a custom selector is configured hide the form in its old position
     $response->addCommand(new ReplaceCommand($prefix, ''));

@@ -146,7 +146,7 @@ class ContactAjaxTest extends WebTestBase {
     $edit['message[0][value]'] = 'test message';
     $this->drupalGet('contact/' . $form_id);
     $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
-    $match = strpos($commands[2]['data'], 'Your message has been sent.') !== FALSE ? TRUE : FALSE;
+    $match = strpos($commands[3]['data'], 'Your message has been sent.') !== FALSE ? TRUE : FALSE;
     $this->assertTrue($match, '[OK] Your message has been sent.');
 
     // submit form reload custom message
@@ -160,7 +160,7 @@ class ContactAjaxTest extends WebTestBase {
     $edit['message[0][value]'] = 'test message';
     $this->drupalGet('contact/' . $form_id);
     $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
-    $match = strpos($commands[1]['data'], 'test ajax message') !== FALSE ? TRUE : FALSE;
+    $match = strpos($commands[3]['data'], 'test ajax message') !== FALSE ? TRUE : FALSE;
     $this->assertTrue($match, '[OK] test ajax message');
 
     // send form reload another node
@@ -174,7 +174,10 @@ class ContactAjaxTest extends WebTestBase {
     $edit['message[0][value]'] = 'test message';
     $this->drupalGet('contact/' . $form_id);
     $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
-    $match = strpos($commands[1]['data'], 'test ajax title') !== FALSE ? TRUE : FALSE;
+    $match = strpos($commands[3]['data'], 'test ajax title') !== FALSE ? TRUE : FALSE;
     $this->assertTrue($match, '[OK] test ajax title');
+
+
+
   }
 }
