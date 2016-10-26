@@ -14,6 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\contact\Entity\ContactForm;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Render\Element\StatusMessages;
 
@@ -61,18 +62,6 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#title' => t('Hide form on success'),
     '#description' => t('When the ajax submission return without error hide the contact form.'),
     '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'hide_form', FALSE),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
-      ),
-    ),
-  ];
-
-  $form['contact_ajax']['contact_ajax_prefix_id'] = [
-    '#type' => 'textfield',
-    '#title' => t('Prefix id'),
-    '#description' => t('When contact ajax is enabled, a wrapper is created around the form, with this settings you can choose a custom ID from the HTML wrapper element. Leave empty if you don\'t need it'),
-    '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'prefix_id', FALSE),
     '#states' => array(
       'visible' => array(
         ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
@@ -129,6 +118,37 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     ),
   ];
 
+  $form['contact_ajax']['advanced'] = array(
+    '#type' => 'details',
+    '#title' => t('ADVANCED SETTINGS'),
+    '#open' => FALSE,
+    //'#collapsed' => TRUE,
+  );
+
+  $form['contact_ajax']['advanced']['contact_ajax_prefix_id'] = [
+    '#type' => 'textfield',
+    '#title' => t('Prefix id'),
+    '#description' => t('When contact ajax is enabled, a wrapper is created around the form, with this settings you can choose a custom ID from the HTML wrapper element. Leave empty if you don\'t need it'),
+    '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'prefix_id', FALSE),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
+      ),
+    ),
+  ];
+
+  $form['contact_ajax']['advanced']['contact_ajax_render_selector'] = [
+    '#type' => 'textfield',
+    '#title' => t('Render into this HTML element class/id'),
+    '#description' => t('If you need to load the response into an element different from Prefix_id you can write here the class id. i.e : .render-here , #render-here.'),
+    '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'render_selector', FALSE),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
+      ),
+    ),
+  ];
+
   $form['#entity_builders'][] = 'contact_ajax_contact_form_form_builder';
 }
 
@@ -141,6 +161,7 @@ function contact_ajax_contact_form_form_builder($entity_type, ContactFormInterfa
   $contact_form->setThirdPartySetting('contact_ajax', 'enabled', $form_state->getValue('contact_ajax_enabled'));
   $contact_form->setThirdPartySetting('contact_ajax', 'hide_form', $form_state->getValue('contact_ajax_hide_form'));
   $contact_form->setThirdPartySetting('contact_ajax', 'prefix_id', $form_state->getValue('contact_ajax_prefix_id'));
+  $contact_form->setThirdPartySetting('contact_ajax', 'render_selector', $form_state->getValue('contact_ajax_render_selector'));
 
   // get the confirmation type
   $confirmation_type = $form_state->getValue('contact_ajax_confirmation_type');
@@ -243,11 +264,17 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
     $form = $form_object->form($form, $form_state);
   }
 
-  if (!$hide_form) {
+  if (!$hide_form || $form_state->getErrors()) {
     $output[] = $form;
   }
 
-  $response->addCommand(new HtmlCommand('#' . $element_id, $output));
+  $render_here = $contact_form->getThirdPartySetting('contact_ajax', 'render_selector', FALSE);
+  $render_selector = $render_here ? $render_here : '#' . $element_id;
+  if ($render_selector != $element_id) {
+    // if a custom selector is configured hide the form in its old position
+    $response->addCommand(new ReplaceCommand('#' . $element_id, ''));
+  }
+  $response->addCommand(new HtmlCommand($render_selector, $output));
 
   return $response;
 }
