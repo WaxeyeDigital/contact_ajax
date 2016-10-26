@@ -131,6 +131,51 @@ class ContactAjaxTest extends WebTestBase {
     $this->drupalPostForm('admin/structure/contact/add', $edit, t('Save'));
     $this->assertText(t('Contact form test_label has been added.'));
 
+    // create a form that reload the content on another div element
+    $form_id = 'test_load_other_element';
+    $edit = [];
+    // 8.2.x added the message field, which is by default empty. Conditionally
+    // submit it if the field can be found.
+    $this->drupalGet('admin/structure/contact/add');
+    if ($this->xpath($this->constructFieldXpath('name', 'message'))) {
+      $edit['message'] = $message;
+    }
+    $edit['label'] = 'test_label';
+    $edit['id'] = $form_id;
+    $edit['recipients'] = $mail;
+    $edit['reply'] = '';
+    $edit['selected'] = TRUE;
+    // specific con contact_ajax
+    $edit['contact_ajax_enabled'] = TRUE;
+    $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FORM;
+    $edit['contact_ajax_prefix_id'] = 'ajax-contact-prefix';
+    $edit['contact_ajax_render_selector'] = '#render-selector';
+
+    $this->drupalPostForm('admin/structure/contact/add', $edit, t('Save'));
+    $this->assertText(t('Contact form test_label has been added.'));
+
+    // create a form that reload the content without the form
+    $form_id = 'test_load_without_form';
+    $edit = [];
+    // 8.2.x added the message field, which is by default empty. Conditionally
+    // submit it if the field can be found.
+    $this->drupalGet('admin/structure/contact/add');
+    if ($this->xpath($this->constructFieldXpath('name', 'message'))) {
+      $edit['message'] = $message;
+    }
+    $edit['label'] = 'test_label';
+    $edit['id'] = $form_id;
+    $edit['recipients'] = $mail;
+    $edit['reply'] = '';
+    $edit['selected'] = TRUE;
+    // specific con contact_ajax
+    $edit['contact_ajax_enabled'] = TRUE;
+    $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FORM;
+    $edit['contact_ajax_hide_form'] = TRUE;
+
+    $this->drupalPostForm('admin/structure/contact/add', $edit, t('Save'));
+    $this->assertText(t('Contact form test_label has been added.'));
+
     // Ensure that anonymous can submit site-wide contact form.
     user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access site-wide contact form'));
     $this->drupalLogout();
@@ -177,7 +222,45 @@ class ContactAjaxTest extends WebTestBase {
     $match = strpos($commands[3]['data'], 'test ajax title') !== FALSE ? TRUE : FALSE;
     $this->assertTrue($match, '[OK] test ajax title');
 
+    // send form reload another node
+    $form_id = 'test_load_other_element';
+    $mail = 'simpletest@example.com';
+    // submit a contact form
+    $edit = [];
+    $edit['name'] = 'Test name';
+    $edit['mail'] = $mail;
+    $edit['subject[0][value]'] = 'test subject';
+    $edit['message[0][value]'] = 'test message';
+    $this->drupalGet('contact/' . $form_id);
+    $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
+    $match = strpos($commands[3]['data'], 'test ajax title') !== FALSE ? TRUE : FALSE;
 
+    // first command erase the old div content #ajax-contact-prefix
+    $clean_old_div = ($commands[2]['method'] == 'replaceWith' &&
+                      $commands[2]['selector'] == '#ajax-contact-prefix' &&
+                      $commands[2]['data'] == '');
+
+    // then test if the replacement will be done in the new container
+    $render_new_container = ($commands[3]['method'] == 'html' &&
+                             $commands[3]['selector'] == '#render-selector' &&
+                             strpos($commands[3]['data'], 'Your message has been sent') !== FALSE);
+
+    $this->assertTrue( ($clean_old_div && $render_new_container), '[OK] test render new container');
+
+    // send form reload another node
+    $form_id = 'test_load_without_form';
+    $mail = 'simpletest@example.com';
+    // submit a contact form
+    $edit = [];
+    $edit['name'] = 'Test name';
+    $edit['mail'] = $mail;
+    $edit['subject[0][value]'] = 'test subject';
+    $edit['message[0][value]'] = 'test message';
+    $this->drupalGet('contact/' . $form_id);
+    $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
+    $match_success = strpos($commands[2]['data'], ' Your message has been sent') !== FALSE ? TRUE : FALSE;
+    $match_no_form = strpos($commands[2]['data'], 'Subject') === FALSE ? TRUE : FALSE;
+    $this->assertTrue($match_success && $match_no_form, '[OK] test render without form');
 
   }
 }
