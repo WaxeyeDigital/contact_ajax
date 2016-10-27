@@ -273,7 +273,7 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   $prefix = '#' . $element_id;
   $render_here = $contact_form->getThirdPartySetting('contact_ajax', 'render_selector', FALSE);
   $render_selector = $render_here ? $render_here : $prefix;
-  if ($render_here != $prefix) {
+  if ($render_selector != $prefix) {
     // if a custom selector is configured hide the form in its old position
     $response->addCommand(new ReplaceCommand($prefix, ''));
   }
