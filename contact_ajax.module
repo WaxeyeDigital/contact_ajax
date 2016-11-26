@@ -262,6 +262,7 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   if (!$form_state->getErrors()) {
     // no errors on validation so better rebuild the form
     // and clear all the values before print it again.
+    $form_state->setUserInput(array());
     $form_state->setRebuild();
     $form = $form_object->form($form, $form_state);
   }
