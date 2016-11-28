@@ -8,9 +8,6 @@ contact.form.*.third_party.contact_ajax:
     render_selector:
       type: string
       label: 'Render selector'
-    hide_form:
-      type: boolean
-      label: 'Hide form'
     prefix_id:
       type: string
       label: 'Prefix id'

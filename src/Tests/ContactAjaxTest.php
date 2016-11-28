@@ -77,7 +77,6 @@ class ContactAjaxTest extends WebTestBase {
     // specific con contact_ajax
     $edit['contact_ajax_enabled'] = TRUE;
     $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FORM;
-    //$edit['contact_ajax_hide_form'] = TRUE;
     $this->createContactAjaxForm($edit);
 
     // add a new contact form to test the custom message confirmation type
@@ -93,7 +92,6 @@ class ContactAjaxTest extends WebTestBase {
     $edit['contact_ajax_enabled'] = TRUE;
     $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FROM_MESSAGE;
     $edit['contact_ajax_load_from_message[value]'] = '<div><b>test ajax message</b></div>';
-    //$edit['contact_ajax_hide_form'] = TRUE;
     $this->createContactAjaxForm($edit);
 
     // add a new contact form to test the node content confirmation type
@@ -107,7 +105,6 @@ class ContactAjaxTest extends WebTestBase {
     // specific con contact_ajax
     $edit['contact_ajax_enabled'] = TRUE;
     $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FROM_URI;
-    //$edit['contact_ajax_hide_form'] = TRUE;
     // create a content type
     $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
     $node = $this->drupalCreateNode(array(
@@ -129,7 +126,6 @@ class ContactAjaxTest extends WebTestBase {
     $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FORM;
     $edit['contact_ajax_prefix_id'] = 'ajax-contact-prefix';
     $edit['contact_ajax_render_selector'] = '#render-selector';
-    //$edit['contact_ajax_hide_form'] = TRUE;
     $this->createContactAjaxForm($edit);
 
     // create a form that reload the content without the form
@@ -142,7 +138,6 @@ class ContactAjaxTest extends WebTestBase {
     // specific con contact_ajax
     $edit['contact_ajax_enabled'] = TRUE;
     $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FORM;
-    $edit['contact_ajax_hide_form'] = TRUE;
     $this->createContactAjaxForm($edit);
 
     // Ensure that anonymous can submit site-wide contact form.
