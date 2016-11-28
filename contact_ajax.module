@@ -127,6 +127,11 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#title' => t('ADVANCED SETTINGS'),
     '#open' => FALSE,
     //'#collapsed' => TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['contact_ajax']['advanced']['contact_ajax_prefix_id'] = [
