@@ -260,6 +260,9 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
         break;
      }
   }
+  else if ($form_state->getErrors()) {
+    $output[] = $form;
+  }
   else {
     // default reload the page printing the status message
     $output[] = $messages;
