@@ -130,7 +130,7 @@ class ContactAjaxTest extends WebTestBase {
 
     // create a form that reload the content without the form
     $edit = [];
-    $edit['id'] = 'test_load_without_form';
+    $edit['id'] = 'test_load_with_validation_errors';
     $edit['label'] = 'test_label';
     $edit['recipients'] = $mail;
     $edit['reply'] = '';
@@ -234,21 +234,26 @@ class ContactAjaxTest extends WebTestBase {
     $this->assertTrue( ($clean_old_div && $render_new_container), '[OK] test render new container');
 
     // send form reload another node
-    $form_id = 'test_load_without_form';
+    $form_id = 'test_load_with_validation_errors';
     $this->drupalGet('contact/' . $form_id);
+
+    $edit = [];
+    $edit['name'] = '';
+    $edit['mail'] = $mail;
+    $edit['subject[0][value]'] = 'test subject';
+    $edit['message[0][value]'] = 'test message';
+
     $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
-    $match_success = FALSE;
+    $match_form = FALSE;
+    $match_validation_message = FALSE;
     foreach ($commands as $command) {
-      if (isset($command['data']) && strpos($command['data'], 'Your message has been sent') !== FALSE) {
-        $match_success = TRUE;
+      if (isset($command['data']) && strpos($command['data'], '<form') !== FALSE) {
+        $match_form = TRUE;
+      }
+      if (isset($command['data']) && strpos($command['data'], 'Your name field is required.') !== FALSE) {
+        $match_validation_message = TRUE;
       }
     }
-    $match_no_form = FALSE;
-    foreach ($commands as $command) {
-      if (isset($command['data']) && strpos($command['data'], 'Subject') === FALSE) {
-        $match_no_form = TRUE;
-      }
-    }
-    $this->assertTrue($match_success && $match_no_form, '[OK] test render without form');
+    $this->assertTrue($match_form && $match_validation_message, '[OK] test render without form');
   }
 }
