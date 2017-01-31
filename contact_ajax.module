@@ -17,6 +17,7 @@ use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Render\Element\StatusMessages;
+use Drupal\views\Ajax\ScrollTopCommand;
 
 /**
  * Contact ajax form prefix
@@ -214,6 +215,9 @@ function contact_ajax_form_contact_message_form_alter(&$form, &$form_state, $for
           'wrapper' => $element_id,
           'effect' => 'fade',
       );
+      if (\Drupal::moduleHandler()->moduleExists('views')) {
+        $form['#attached']['library'][] = 'views/views.ajax';
+      }
     }
   }
 }
@@ -240,7 +244,10 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   // Create AJAX Response object.
   $response = new AjaxResponse();
 
-  $output = array();
+  $output = array(
+    '#type' => 'container',
+    '#attributes' => array('id' => $element_id),
+  );
 
   if (!$form_state->getErrors() && $confirmation_type != CONTACT_AJAX_LOAD_FORM) {
     switch ($confirmation_type) {
@@ -279,6 +286,10 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
     $response->addCommand(new ReplaceCommand($prefix, ''));
   }
   $response->addCommand(new HtmlCommand($render_selector, $output));
+
+  if (\Drupal::moduleHandler()->moduleExists('views')) {
+    $response->addCommand(new ScrollTopCommand($render_selector));
+  }
 
   return $response;
 }
