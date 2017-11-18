@@ -25,7 +25,7 @@ class ContactAjaxTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array(
+  public static $modules = [
     'node',
     'text',
     'block',
@@ -33,7 +33,7 @@ class ContactAjaxTest extends WebTestBase {
     'contact_test',
     'field_ui',
     'contact_ajax',
-  );
+  ];
 
   /**
    * Tests contact messages submitted through contact form.
@@ -44,7 +44,7 @@ class ContactAjaxTest extends WebTestBase {
     $this->drupalPlaceBlock('page_title_block');
 
     // Create and login administrative user.
-    $admin_user = $this->drupalCreateUser(array(
+    $admin_user = $this->drupalCreateUser([
           'access site-wide contact form',
           'administer contact forms',
           'administer users',
@@ -52,7 +52,7 @@ class ContactAjaxTest extends WebTestBase {
           'administer contact_message fields',
           'administer contact_message form display',
           'administer contact_message display',
-          ));
+          ]);
     $this->drupalLogin($admin_user);
 
     // test if ajax settings has been added
@@ -106,11 +106,11 @@ class ContactAjaxTest extends WebTestBase {
     $edit['contact_ajax_enabled'] = TRUE;
     $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FROM_URI;
     // create a content type
-    $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
-    $node = $this->drupalCreateNode(array(
+    $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
+    $node = $this->drupalCreateNode([
       'title' => 'test ajax title',
       'type' => 'article',
-    ));
+    ]);
     $edit['contact_ajax_load_from_uri'] = 'test ajax title (' . $node->id() . ')';
     $this->createContactAjaxForm($edit);
 
@@ -141,7 +141,7 @@ class ContactAjaxTest extends WebTestBase {
     $this->createContactAjaxForm($edit);
 
     // Ensure that anonymous can submit site-wide contact form.
-    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access site-wide contact form'));
+    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, ['access site-wide contact form']);
     $this->drupalLogout();
   }
 
@@ -170,7 +170,7 @@ class ContactAjaxTest extends WebTestBase {
 
     $form_id = 'test_id';
     $this->drupalGet('contact/' . $form_id);
-    $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
+    $commands = $this->drupalPostAjaxForm(NULL, $edit, ['op' => t('Send message')]);
     $match = FALSE;
     foreach ($commands as $command) {
       if (isset($command['data']) && strpos($command['data'], 'Your message has been sent.') !== FALSE) {
@@ -182,7 +182,7 @@ class ContactAjaxTest extends WebTestBase {
     // submit form reload custom message
     $form_id = 'test_custom_message_id';
     $this->drupalGet('contact/' . $form_id);
-    $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
+    $commands = $this->drupalPostAjaxForm(NULL, $edit, ['op' => t('Send message')]);
     //$match = strpos($commands[1]['data'], 'test ajax message') !== FALSE ? TRUE : FALSE;
     $match = FALSE;
     foreach ($commands as $command) {
@@ -195,7 +195,7 @@ class ContactAjaxTest extends WebTestBase {
     // send form reload another node
     $form_id = 'test_node_content';
     $this->drupalGet('contact/' . $form_id);
-    $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
+    $commands = $this->drupalPostAjaxForm(NULL, $edit, ['op' => t('Send message')]);
     //$match = strpos($commands[1]['data'], 'test ajax title') !== FALSE ? TRUE : FALSE;
     $match = FALSE;
     foreach ($commands as $command) {
@@ -208,7 +208,7 @@ class ContactAjaxTest extends WebTestBase {
     // send form reload another node
     $form_id = 'test_load_other_element';
     $this->drupalGet('contact/' . $form_id);
-    $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
+    $commands = $this->drupalPostAjaxForm(NULL, $edit, ['op' => t('Send message')]);
     $clean_old_div = FALSE;
     foreach ($commands as $command) {
       $t = (isset($command['data']) && isset($command['method']) && isset($command['selector'])
@@ -243,7 +243,7 @@ class ContactAjaxTest extends WebTestBase {
     $edit['subject[0][value]'] = 'test subject';
     $edit['message[0][value]'] = 'test message';
 
-    $commands = $this->drupalPostAjaxForm(NULL, $edit, array('op' => t('Send message')));
+    $commands = $this->drupalPostAjaxForm(NULL, $edit, ['op' => t('Send message')]);
     $match_form = FALSE;
     $match_validation_message = FALSE;
     foreach ($commands as $command) {

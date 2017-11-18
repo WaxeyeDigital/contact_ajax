@@ -46,10 +46,10 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
   /** @var \Drupal\contact\ContactFormInterface $contact_form */
   $contact_form = $form_state->getFormObject()->getEntity();
 
-  $form['contact_ajax'] = array(
+  $form['contact_ajax'] = [
     '#type' => 'fieldset',
     '#title' => t('Contact ajax'),
-  );
+  ];
 
   $form['contact_ajax']['contact_ajax_enabled'] = [
     '#type' => 'checkbox',
@@ -78,17 +78,17 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#type' => 'select',
     '#title' => t('On submit load'),
     '#description' => t('Select which content have to be loaded after submit.'),
-    '#options' => array(
+    '#options' => [
         CONTACT_AJAX_LOAD_FORM => t('Default message'),
         CONTACT_AJAX_LOAD_FROM_URI => t('Node content'),
         CONTACT_AJAX_LOAD_FROM_MESSAGE => t('Custom message'),
-      ),
+      ],
     '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'confirmation_type', FALSE),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
-      ),
-    ),
+    '#states' => [
+      'visible' => [
+        ':input[name="contact_ajax_enabled"]' => ['checked' => TRUE],
+      ],
+    ],
   ];
 
   // default entity_autocomplete get a node object as default value
@@ -100,12 +100,12 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#default_value' => $node,
     '#title' => t('Node to load'),
     '#description' => t('This node will load its content after the form Submit.'),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
-        ':input[name="contact_ajax_confirmation_type"]' => array('value' => CONTACT_AJAX_LOAD_FROM_URI),
-      ),
-    ),
+    '#states' => [
+      'visible' => [
+        ':input[name="contact_ajax_enabled"]' => ['checked' => TRUE],
+        ':input[name="contact_ajax_confirmation_type"]' => ['value' => CONTACT_AJAX_LOAD_FROM_URI],
+      ],
+    ],
   ];
 
   $confirmation_message = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_message', FALSE);
@@ -115,36 +115,36 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#title' => t('Message to load'),
     '#description' => t('This message will load after form submit.'),
     '#default_value' => $confirmation_message_value,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
-        ':input[name="contact_ajax_confirmation_type"]' => array('value' => CONTACT_AJAX_LOAD_FROM_MESSAGE),
-      ),
-    ),
+    '#states' => [
+      'visible' => [
+        ':input[name="contact_ajax_enabled"]' => ['checked' => TRUE],
+        ':input[name="contact_ajax_confirmation_type"]' => ['value' => CONTACT_AJAX_LOAD_FROM_MESSAGE],
+      ],
+    ],
   ];
 
-  $form['contact_ajax']['advanced'] = array(
+  $form['contact_ajax']['advanced'] = [
     '#type' => 'details',
     '#title' => t('ADVANCED SETTINGS'),
     '#open' => FALSE,
     //'#collapsed' => TRUE,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
+    '#states' => [
+      'visible' => [
+        ':input[name="contact_ajax_enabled"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
 
   $form['contact_ajax']['advanced']['contact_ajax_prefix_id'] = [
     '#type' => 'textfield',
     '#title' => t('Prefix id'),
     '#description' => t('When contact ajax is enabled, a wrapper is created around the form, with this settings you can choose a custom ID from the HTML wrapper element. Leave empty if you don\'t need it'),
     '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'prefix_id', FALSE),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
-      ),
-    ),
+    '#states' => [
+      'visible' => [
+        ':input[name="contact_ajax_enabled"]' => ['checked' => TRUE],
+      ],
+    ],
   ];
 
   $form['contact_ajax']['advanced']['contact_ajax_render_selector'] = [
@@ -152,11 +152,11 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#title' => t('Render into this HTML element class/id'),
     '#description' => t('If you need to load the response into an element different from Prefix_id you can write here the class id. i.e : .render-here , #render-here.'),
     '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'render_selector', FALSE),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
-      ),
-    ),
+    '#states' => [
+      'visible' => [
+        ':input[name="contact_ajax_enabled"]' => ['checked' => TRUE],
+      ],
+    ],
   ];
 
   $form['#entity_builders'][] = 'contact_ajax_contact_form_form_builder';
@@ -210,11 +210,11 @@ function contact_ajax_form_contact_message_form_alter(&$form, &$form_state, $for
       $form['#suffix'] = '</div>';
 
       // adjust the form to use ajax submit
-      $form['actions']['submit']['#ajax'] = array(
+      $form['actions']['submit']['#ajax'] = [
           'callback' => 'contact_ajax_contact_site_form_ajax_callback',
           'wrapper' => $element_id,
           'effect' => 'fade',
-      );
+      ];
       if (\Drupal::moduleHandler()->moduleExists('views')) {
         $form['#attached']['library'][] = 'views/views.ajax';
       }
@@ -244,10 +244,10 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   // Create AJAX Response object.
   $response = new AjaxResponse();
 
-  $output = array(
+  $output = [
     '#type' => 'container',
-    '#attributes' => array('id' => $element_id),
-  );
+    '#attributes' => ['id' => $element_id],
+  ];
 
   if (!$form_state->getErrors() && $confirmation_type != CONTACT_AJAX_LOAD_FORM) {
     switch ($confirmation_type) {
