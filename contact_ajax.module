@@ -6,9 +6,6 @@
  */
 
 use Drupal\contact\MessageForm;
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\contact\ContactFormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\contact\Entity\ContactForm;
@@ -25,7 +22,7 @@ use Drupal\views\Ajax\ScrollTopCommand;
 const CONTACT_AJAX_PREFIX = 'contact_ajax_';
 
 /**
- * Reload the default message after submit
+ * Reload the default message after submit.
  */
 const CONTACT_AJAX_LOAD_DEFAULT_MESSAGE = 1;
 
@@ -63,22 +60,6 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'enabled', FALSE),
   ];
 
-  //
-  // This settings is TRUE for default, the contact_form will be always
-  // hide after the submission.
-  //
-  // $form['contact_ajax']['contact_ajax_hide_form'] = [
-  //   '#type' => 'checkbox',
-  //   '#title' => t('Hide form on success'),
-  //   '#description' => t('When the ajax submission return without error hide the contact form.'),
-  //   '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'hide_form', FALSE),
-  //   '#states' => array(
-  //     'visible' => array(
-  //       ':input[name="contact_ajax_enabled"]' => array('checked' => TRUE),
-  //     ),
-  //   ),
-  // ];
-
   $form['contact_ajax']['contact_ajax_confirmation_type'] = [
     '#type' => 'select',
     '#title' => t('On submit load'),
@@ -97,7 +78,7 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     ],
   ];
 
-  // default entity_autocomplete get a node object as default value
+  // Default entity_autocomplete get a node object as default value.
   $node_id = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_uri', FALSE);
   $node = $node_id ? Node::load($node_id) : FALSE;
   $form['contact_ajax']['contact_ajax_load_from_uri'] = [
@@ -133,7 +114,6 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#type' => 'details',
     '#title' => t('ADVANCED SETTINGS'),
     '#open' => FALSE,
-    //'#collapsed' => TRUE,
     '#states' => [
       'visible' => [
         ':input[name="contact_ajax_enabled"]' => ['checked' => TRUE],
@@ -178,7 +158,7 @@ function contact_ajax_contact_form_form_builder($entity_type, ContactFormInterfa
   $contact_form->setThirdPartySetting('contact_ajax', 'prefix_id', $form_state->getValue('contact_ajax_prefix_id'));
   $contact_form->setThirdPartySetting('contact_ajax', 'render_selector', $form_state->getValue('contact_ajax_render_selector'));
 
-  // get the confirmation type
+  // Get the confirmation type.
   $confirmation_type = $form_state->getValue('contact_ajax_confirmation_type');
   $contact_form->setThirdPartySetting('contact_ajax', 'confirmation_type', $confirmation_type);
 
@@ -186,9 +166,11 @@ function contact_ajax_contact_form_form_builder($entity_type, ContactFormInterfa
     case CONTACT_AJAX_LOAD_FROM_URI:
       $contact_form->setThirdPartySetting('contact_ajax', 'load_from_uri', $form_state->getValue('contact_ajax_load_from_uri'));
       break;
+
     case CONTACT_AJAX_LOAD_FROM_MESSAGE:
       $contact_form->setThirdPartySetting('contact_ajax', 'load_from_message', $form_state->getValue('contact_ajax_load_from_message'));
       break;
+
     case CONTACT_AJAX_LOAD_CLEAN_FORM:
       $contact_form->setThirdPartySetting('contact_ajax', 'load_clean_form', $form_state->getValue('contact_ajax_load_clean_form'));
       break;
@@ -218,11 +200,11 @@ function contact_ajax_form_contact_message_form_alter(&$form, &$form_state, $for
       $form['#prefix'] = '<div id="' . $element_id . '">';
       $form['#suffix'] = '</div>';
 
-      // adjust the form to use ajax submit
+      // Adjust the form to use ajax submit.
       $form['actions']['submit']['#ajax'] = [
-          'callback' => 'contact_ajax_contact_site_form_ajax_callback',
-          'wrapper' => $element_id,
-          'effect' => 'fade',
+        'callback' => 'contact_ajax_contact_site_form_ajax_callback',
+        'wrapper' => $element_id,
+        'effect' => 'fade',
       ];
       if (\Drupal::moduleHandler()->moduleExists('views')) {
         $form['#attached']['library'][] = 'views/views.ajax';
@@ -233,9 +215,14 @@ function contact_ajax_form_contact_message_form_alter(&$form, &$form_state, $for
 
 /**
  * Ajax callback for contact form.
+ *
  * @param array $form
+ *   The form.
  * @param \Drupal\core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ *
  * @return \Drupal\core\Ajax\AjaxResponse
+ *   The ajax response.
  */
 function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface &$form_state) {
 
@@ -248,7 +235,8 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   $prefix_id = $contact_form->getThirdPartySetting('contact_ajax', 'prefix_id', FALSE);
   $element_id = $prefix_id ? $prefix_id : CONTACT_AJAX_PREFIX . $form_object->getFormId();
 
-  $messages = StatusMessages::renderMessages(NULL); // Used to display results of drupal_set_message() calls.
+  // Used to display results of drupal_set_message() calls.
+  $messages = StatusMessages::renderMessages(NULL);
 
   // Create AJAX Response object.
   $response = new AjaxResponse();
@@ -270,6 +258,7 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
           $output['#markup'] = \Drupal::service('renderer')->renderRoot($renderarray);
         }
         break;
+
       case CONTACT_AJAX_LOAD_FROM_MESSAGE:
         // Load the custom message from the config field.
         $confirmation_message = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_message', FALSE);
@@ -310,7 +299,7 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
         $output[] = $messages;
     }
   }
-  else if ($form_state->getErrors()) {
+  elseif ($form_state->getErrors()) {
     $output[] = $messages;
     $output[] = $form;
   }
@@ -319,7 +308,7 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   $render_here = $contact_form->getThirdPartySetting('contact_ajax', 'render_selector', FALSE);
   $render_selector = $render_here ? $render_here : $prefix;
   if ($render_selector != $prefix) {
-    // if a custom selector is configured hide the form in its old position
+    // If a custom selector is configured hide the form in its old position.
     $response->addCommand(new ReplaceCommand($prefix, ''));
   }
   $response->addCommand(new HtmlCommand($render_selector, $output));
