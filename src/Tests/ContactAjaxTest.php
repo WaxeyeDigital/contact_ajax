@@ -76,7 +76,7 @@ class ContactAjaxTest extends WebTestBase {
     $edit['selected'] = TRUE;
     // specific con contact_ajax
     $edit['contact_ajax_enabled'] = TRUE;
-    $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FORM;
+    $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_DEFAULT_MESSAGE;
     $this->createContactAjaxForm($edit);
 
     // add a new contact form to test the custom message confirmation type
@@ -123,7 +123,7 @@ class ContactAjaxTest extends WebTestBase {
     $edit['selected'] = TRUE;
     // specific con contact_ajax
     $edit['contact_ajax_enabled'] = TRUE;
-    $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FORM;
+    $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_DEFAULT_MESSAGE;
     $edit['contact_ajax_prefix_id'] = 'ajax-contact-prefix';
     $edit['contact_ajax_render_selector'] = '#render-selector';
     $this->createContactAjaxForm($edit);
@@ -137,7 +137,7 @@ class ContactAjaxTest extends WebTestBase {
     $edit['selected'] = TRUE;
     // specific con contact_ajax
     $edit['contact_ajax_enabled'] = TRUE;
-    $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_FORM;
+    $edit['contact_ajax_confirmation_type'] = CONTACT_AJAX_LOAD_DEFAULT_MESSAGE;
     $this->createContactAjaxForm($edit);
 
     // Ensure that anonymous can submit site-wide contact form.

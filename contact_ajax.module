@@ -20,24 +20,29 @@ use Drupal\Core\Render\Element\StatusMessages;
 use Drupal\views\Ajax\ScrollTopCommand;
 
 /**
- * Contact ajax form prefix
+ * Contact ajax form prefix.
  */
 const CONTACT_AJAX_PREFIX = 'contact_ajax_';
 
 /**
- * Reload the form after submit
+ * Reload the default message after submit
  */
-const CONTACT_AJAX_LOAD_FORM = 1;
+const CONTACT_AJAX_LOAD_DEFAULT_MESSAGE = 1;
 
 /**
- * Load the content from another node
+ * Load the content from another node.
  */
 const CONTACT_AJAX_LOAD_FROM_URI = 2;
 
 /**
- * Load the content from the message
+ * Load the content from the message.
  */
 const CONTACT_AJAX_LOAD_FROM_MESSAGE = 3;
+
+/**
+ * Load the default message and an empty form.
+ */
+const CONTACT_AJAX_LOAD_CLEAN_FORM = 4;
 
 /**
  * Implements hook_form_FORM_ID_alter() for contact_form_form().
@@ -79,10 +84,11 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
     '#title' => t('On submit load'),
     '#description' => t('Select which content have to be loaded after submit.'),
     '#options' => [
-        CONTACT_AJAX_LOAD_FORM => t('Default message'),
-        CONTACT_AJAX_LOAD_FROM_URI => t('Node content'),
-        CONTACT_AJAX_LOAD_FROM_MESSAGE => t('Custom message'),
-      ],
+      CONTACT_AJAX_LOAD_DEFAULT_MESSAGE => t('Default message'),
+      CONTACT_AJAX_LOAD_CLEAN_FORM => t('Default message and empty form'),
+      CONTACT_AJAX_LOAD_FROM_URI => t('Node content'),
+      CONTACT_AJAX_LOAD_FROM_MESSAGE => t('Custom message'),
+    ],
     '#default_value' => $contact_form->getThirdPartySetting('contact_ajax', 'confirmation_type', FALSE),
     '#states' => [
       'visible' => [
@@ -183,6 +189,9 @@ function contact_ajax_contact_form_form_builder($entity_type, ContactFormInterfa
     case CONTACT_AJAX_LOAD_FROM_MESSAGE:
       $contact_form->setThirdPartySetting('contact_ajax', 'load_from_message', $form_state->getValue('contact_ajax_load_from_message'));
       break;
+    case CONTACT_AJAX_LOAD_CLEAN_FORM:
+      $contact_form->setThirdPartySetting('contact_ajax', 'load_clean_form', $form_state->getValue('contact_ajax_load_clean_form'));
+      break;
   }
 }
 
@@ -224,9 +233,9 @@ function contact_ajax_form_contact_message_form_alter(&$form, &$form_state, $for
 
 /**
  * Ajax callback for contact form.
- * @param type $form
- * @param type $form_state
- * @return type
+ * @param array $form
+ * @param \Drupal\core\Form\FormStateInterface $form_state
+ * @return \Drupal\core\Ajax\AjaxResponse
  */
 function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface &$form_state) {
 
@@ -249,7 +258,7 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
     '#attributes' => ['id' => $element_id],
   ];
 
-  if (!$form_state->getErrors() && $confirmation_type != CONTACT_AJAX_LOAD_FORM) {
+  if (!$form_state->getErrors()) {
     switch ($confirmation_type) {
       case CONTACT_AJAX_LOAD_FROM_URI:
         // load_from_uri is configured, so load the node content.
@@ -262,21 +271,49 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
         }
         break;
       case CONTACT_AJAX_LOAD_FROM_MESSAGE:
+        // Load the custom message from the config field.
         $confirmation_message = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_message', FALSE);
         $output['#markup'] = $confirmation_message ? $confirmation_message['value'] : '';
         break;
-     }
+
+      case CONTACT_AJAX_LOAD_CLEAN_FORM:
+        // Load the default status message and a clean form.
+        $output[] = $messages;
+
+        // Create a new contact message and set it as the form entity.
+        $bundle_key = $contact_message->getEntityType()->getKey('bundle');
+        $bundle = $contact_message->bundle();
+        $new_message = \Drupal::service('entity_type.manager')->getStorage('contact_message')->create([$bundle_key => $bundle]);
+        $form_object->setEntity($new_message);
+
+        // Clear user input, skipping system items.
+        $input = $form_state->getUserInput();
+        $keys = $form_state->getCleanValueKeys();
+        $keys[] = 'ajax_page_state';
+        foreach ($input as $key => $item) {
+          if (!in_array($key, $keys) && substr($key, 0, 1) !== '_') {
+            unset($input[$key]);
+          }
+        }
+        $form_state->setUserInput($input);
+
+        // Rebuild the form state values.
+        $form_state->setRebuild();
+        $form_state->setStorage([]);
+        $form = \Drupal::service('form_builder')->rebuildForm($form['#form_id'], $form_state);
+        $output[] = $form;
+        break;
+
+      default:
+        // CONTACT_AJAX_LOAD_DEFAULT_MESSAGE
+        // Load the default status message only.
+        $output[] = $messages;
+    }
   }
   else if ($form_state->getErrors()) {
     $output[] = $messages;
     $output[] = $form;
   }
-  else {
-    // default reload the page printing the status message
-    $output[] = $messages;
-  }
-
-  // TODO: would be nice give an option to render again a cleaned contact form
 
   $prefix = '#' . $element_id;
   $render_here = $contact_form->getThirdPartySetting('contact_ajax', 'render_selector', FALSE);
