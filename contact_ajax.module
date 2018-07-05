@@ -97,11 +97,13 @@ function contact_ajax_form_contact_form_form_alter(&$form, FormStateInterface $f
 
   $confirmation_message = $contact_form->getThirdPartySetting('contact_ajax', 'load_from_message', FALSE);
   $confirmation_message_value = $confirmation_message ? $confirmation_message['value'] : '';
+  $confirmation_message_format = $confirmation_message ? $confirmation_message['format'] : filter_default_format();
   $form['contact_ajax']['contact_ajax_load_from_message'] = [
     '#type' => 'text_format',
     '#title' => t('Message to load'),
     '#description' => t('This message will load after form submit.'),
     '#default_value' => $confirmation_message_value,
+    '#format' => $confirmation_message_format,
     '#states' => [
       'visible' => [
         ':input[name="contact_ajax_enabled"]' => ['checked' => TRUE],
