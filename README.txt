@@ -21,9 +21,8 @@ RECOMMENDED MODULES
 INSTALLATION
 ------------
 
-* Install as you would normally install a contributed Drupal module. See:
-  https://drupal.org/documentation/install/modules-themes/modules-7
-  for further information.
+* Install as you would normally install a contributed Drupal module. Visit:
+  https://www.drupal.org/node/1897420 for further information.
 
 
 CONFIGURATION
