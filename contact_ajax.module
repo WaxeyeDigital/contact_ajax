@@ -247,6 +247,8 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
     '#type' => 'container',
     '#attributes' => ['id' => $element_id],
   ];
+  // Remove prefix/suffix to avoid duplication.
+  unset($form['#prefix'], $form['#suffix']);
 
   if (!$form_state->getErrors()) {
     switch ($confirmation_type) {
@@ -312,8 +314,11 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
   if ($render_selector != $prefix) {
     // If a custom selector is configured hide the form in its old position.
     $response->addCommand(new ReplaceCommand($prefix, ''));
+    $response->addCommand(new HtmlCommand($render_selector, $output));
   }
-  $response->addCommand(new HtmlCommand($render_selector, $output));
+  else {
+    $response->addCommand(new ReplaceCommand($render_selector, $output));
+  }
 
   if (\Drupal::moduleHandler()->moduleExists('views')) {
     $response->addCommand(new ScrollTopCommand($render_selector));
@@ -321,4 +326,3 @@ function contact_ajax_contact_site_form_ajax_callback($form, FormStateInterface 
 
   return $response;
 }
-
