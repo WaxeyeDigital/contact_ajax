@@ -15,6 +15,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Render\Element\StatusMessages;
 use Drupal\views\Ajax\ScrollTopCommand;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Contact ajax form prefix.
@@ -40,6 +41,8 @@ const CONTACT_AJAX_LOAD_FROM_MESSAGE = 3;
  * Load the default message and an empty form.
  */
 const CONTACT_AJAX_LOAD_CLEAN_FORM = 4;
+
+const ANONYMOUS_ID = AccountInterface::ANONYMOUS_ROLE;
 
 /**
  * Implements hook_form_FORM_ID_alter() for contact_form_form().
