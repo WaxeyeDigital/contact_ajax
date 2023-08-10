@@ -1,0 +1,6 @@
+{
+  "name": "drupal/contact_ajax",
+  "type": "drupal-module",
+  "keywords": ["Drupal"],
+  "require": {}
+}
